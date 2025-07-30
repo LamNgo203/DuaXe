@@ -27,6 +27,7 @@ public class UIGameplay : UIBase
         // Pause the game logic here
         Time.timeScale = 0f; // Stop the game time
         UIManager.Instance.ShowUI(UIName.UIPause);
+        SoundManager.Instance.StopEngineSound();
         SoundManager.Instance.PlayGameSound(0);
     }
     public void UpdateScore(int score)

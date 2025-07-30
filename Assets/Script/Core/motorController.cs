@@ -44,8 +44,9 @@ public class SmartBikeController : MonoBehaviour
     
     // Âm thanh xe
     private bool isEngineSoundPlaying = false;
-    private bool shouldPlayEngineSound = false; // Biến để theo dõi trạng thái mong muốn
-
+    private bool shouldPlayEngineSound = false;
+    public bool isMotorOn;
+    public Transform gunDirection;
     void Awake()
     {
         if (rb == null)
@@ -111,10 +112,10 @@ public class SmartBikeController : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (!isStarted) return;
-
+        isMotorOn = false;
         bool isOnGround =
             frontWheelCollider.IsTouchingLayers(groundLayer) ||
             backWheelCollider.IsTouchingLayers(groundLayer);
@@ -125,9 +126,10 @@ public class SmartBikeController : MonoBehaviour
         }
 
         float airTime = Time.time - lastGroundTime;
-
+        
         if (Input.GetMouseButton(0))
         {
+            isMotorOn = true;
             if (airTime < airTimeThreshold)
             {
                 Vector2 boostDir = (transform.right + new Vector3(0, -0.4f, 0)).normalized;
@@ -145,34 +147,51 @@ public class SmartBikeController : MonoBehaviour
         {
             rb.angularVelocity = Mathf.Lerp(rb.angularVelocity, 0f, angularDamping * Time.fixedDeltaTime);
         }
-        
-        if(Input.GetMouseButtonUp(0))
+        if (isMotorOn)
         {
-            smokeTrailPrefab.Stop();
-            
-            // Dừng âm thanh xe khi thả tay
-            if (isEngineSoundPlaying)
-            {
-                SoundManager.Instance.StopEngineSound();
-                isEngineSoundPlaying = false;
-            }
-        }
-        if(Input.GetMouseButtonDown(0))
-        {
-            smokeTrailPrefab.Play();
+            // Phát âm thanh xe nếu chưa phát
             if (!isEngineSoundPlaying && SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlayEngineSound(engineSoundIndex);
                 isEngineSoundPlaying = true;
             }
         }
+        else
+        {
+            // Dừng âm thanh xe nếu đang phát
+            if (isEngineSoundPlaying && SoundManager.Instance != null)
+            {
+                SoundManager.Instance.StopEngineSound();
+                isEngineSoundPlaying = false;
+            }
+        }
+        // if(Input.GetMouseButtonUp(0))
+        // {
+        //     smokeTrailPrefab.Stop();
+            
+        //     // Dừng âm thanh xe khi thả tay
+        //     if (isEngineSoundPlaying)
+        //     {
+        //         SoundManager.Instance.StopEngineSound();
+        //         isEngineSoundPlaying = false;
+        //     }
+        // }
+        // if(Input.GetMouseButtonDown(0))
+        // {
+        //     smokeTrailPrefab.Play();
+        //     if (!isEngineSoundPlaying && SoundManager.Instance != null)
+        //     {
+        //         SoundManager.Instance.PlayEngineSound(engineSoundIndex);
+        //         isEngineSoundPlaying = true;
+        //     }
+        // }
         
         // Tiếp tục phát âm thanh khi giữ chuột
-        if(Input.GetMouseButton(0) && !isEngineSoundPlaying && SoundManager.Instance != null)
-        {
-            SoundManager.Instance.PlayEngineSound(engineSoundIndex);
-            isEngineSoundPlaying = true;
-        }
+        // if(Input.GetMouseButton(0) && !isEngineSoundPlaying && SoundManager.Instance != null)
+        // {
+        //     SoundManager.Instance.PlayEngineSound(engineSoundIndex);
+        //     isEngineSoundPlaying = true;
+        // }
 
         // Xử lý bắn đạn
         if (isFiring)
@@ -200,7 +219,8 @@ public class SmartBikeController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Ground") || 
-            other.gameObject.layer == LayerMask.NameToLayer("Deadzone"))
+            other.gameObject.layer == LayerMask.NameToLayer("Deadzone") ||
+            other.gameObject.layer == LayerMask.NameToLayer("Enemy"))
         {
             if (fxPrefab != null)
             {
@@ -208,7 +228,7 @@ public class SmartBikeController : MonoBehaviour
                 a.Play();
             }
             SoundManager.Instance.StopEngineSound();
-            SoundManager.Instance.PlayGameSound(1); 
+            SoundManager.Instance.PlayGameSound(7); 
             gameObject.SetActive(false);
             UIManager.Instance.GetUiActive<UIGameplay>(UIName.UIGameplay).pauseButton.gameObject.SetActive(false);
             Debug.Log("Motor stopped due to collision with " + LayerMask.LayerToName(other.gameObject.layer));
@@ -266,8 +286,21 @@ public class SmartBikeController : MonoBehaviour
         else
         {
             // Bắn theo hướng xe đang di chuyển
-            fireDirection = transform.right;
+            fireDirection = transform.up;
             Debug.Log("Không tìm thấy enemy, bắn theo hướng xe");
+        }
+        
+        // Cập nhật hướng của gunDirection theo hướng bắn
+        if (gunDirection != null)
+        {
+            // Tính góc quay từ Vector2 fireDirection
+            float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+            gunDirection.rotation = Quaternion.Euler(0, 0, angle);
+            Debug.Log($"Đã quay gunDirection theo góc {angle} độ");
+        }
+        else
+        {
+            Debug.LogWarning("gunDirection chưa được gán!");
         }
         
         // Tạo đạn

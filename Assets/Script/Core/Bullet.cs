@@ -113,7 +113,7 @@ public class Bullet : MonoBehaviour
             // Phát âm thanh
             if (SoundManager.Instance != null)
             {
-                SoundManager.Instance.PlayGameSound(2); // Âm thanh bắn trúng
+                SoundManager.Instance.PlayGameSound(6); // Âm thanh bắn trúng
             }
             
             // Hủy đạn

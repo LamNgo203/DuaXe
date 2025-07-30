@@ -85,7 +85,7 @@ public class SimpleEnemy : MonoBehaviour
         // Phát âm thanh
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlayGameSound(1); // Âm thanh enemy chết
+            SoundManager.Instance.PlayGameSound(6); // Âm thanh enemy chết
         }
         
         // Hủy enemy

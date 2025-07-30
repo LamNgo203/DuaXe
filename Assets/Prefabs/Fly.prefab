@@ -162,8 +162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b80211f7e0ea794cbc11472f6f0a7d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDistance: 0.5
-  moveSpeed: 4
+  moveDistance: 1
+  moveSpeed: 3.5
   deathEffectPrefab: {fileID: 3861025238581586099}
   spriteRenderer: {fileID: 0}
   damageColor: {r: 1, g: 0, b: 0, a: 1}

@@ -92,7 +92,7 @@ public class Enemy : MonoBehaviour
         // Phát âm thanh chết
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlayGameSound(1);
+            SoundManager.Instance.PlayGameSound(6);
         }
 
         Destroy(gameObject);
